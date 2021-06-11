@@ -31,6 +31,8 @@
 
 #include "parser.h"
 #include <qlist.h>
+#include <qvector.h>
+#include <qpair.h>
 #include <qset.h>
 #include <stdio.h>
 
@@ -64,7 +66,7 @@ public:
     QHash<QByteArray, QByteArray> nonlocalIncludePathResolutionCache;
     Macros macros;
     QByteArray resolveInclude(const QByteArray &filename, const QByteArray &relativeTo);
-    Symbols preprocessed(const QByteArray &filename, QFile *device);
+    Symbols preprocessed(const QByteArray &filename, QFile *device, QVector<QPair<QByteArray, int>>& includeHierarchy);
 
     void parseDefineArguments(Macro *m);
 
@@ -84,7 +86,7 @@ public:
 private:
     void until(Token);
 
-    void preprocess(const QByteArray &filename, Symbols &preprocessed);
+    void preprocess(const QByteArray &filename, Symbols &preprocessed, QVector<QPair<QByteArray, int>>& includeHierarchy, int nesting);
 };
 
 QT_END_NAMESPACE
