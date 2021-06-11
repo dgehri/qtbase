@@ -402,7 +402,7 @@ int runMoc(int argc, char **argv)
         
     moc.symbolThreshold = parser.value(mocSymbolThreshold).toInt();
     moc.symbolThresholdError = parser.isSet(mocSymbolThresholdError);
-    moc.showExcludeHierarchy = parser.isSet(mocShowIncludeHiearchy);
+    moc.showIncludeHierarchy = parser.isSet(mocShowIncludeHiearchy);
     
     const QStringList files = parser.positionalArguments();
     output = parser.value(outputOption);
