@@ -1024,6 +1024,27 @@ void Moc::generate(FILE *out, FILE *jsonOutput)
     fprintf(out, "** WARNING! All changes made in this file will be lost!\n"
             "*****************************************************************************/\n\n");
 
+    // Emit error if number of symbols exceeds reasonable threshold
+    if (symbolThreshold > 0 && symbols.size() > symbolThreshold) {
+        auto strFileName = QFile::encodeName(QString::fromStdString(filename.toStdString())).toStdString();
+        if (!symbolThresholdError) {
+            fprintf(out, "#pragma message(\"%s : warning icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\")\n\n", strFileName.c_str(), symbols.size());
+            fprintf(stderr, "%s : warning icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\n", strFileName.c_str(), symbols.size());
+        }
+        else {
+            fprintf(out, "#pragma message(\"%s : error icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\")\n\n", strFileName.c_str(), symbols.size());
+            fprintf(stderr, "%s : error icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\n", strFileName.c_str(), symbols.size());
+        }
+
+        if (showIncludeHierarchy) {
+            fprintf(stderr, " Include hierarchy:\n");
+            for (auto&& [fn, level] : includeHierarchy) {
+                auto str = QFile::encodeName(QString::fromStdString(fn.toStdString())).toStdString();
+                fprintf(stderr, "%*c%s\n", 1+level, ' ', str.c_str());
+            }
+        }
+    }
+
     fprintf(out, "#include <memory>\n");  // For std::addressof
     if (!noInclude) {
         if (includePath.size() && !includePath.endsWith('/'))

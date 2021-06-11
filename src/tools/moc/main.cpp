@@ -374,12 +374,36 @@ int runMoc(int argc, char **argv)
     parser.addPositionalArgument(QStringLiteral("[MOC generated json file]"),
                                  QStringLiteral("MOC generated json output"));
 
+    QCommandLineOption mocHasSymbolThreshold(QStringLiteral("has-symbol-threshold"));
+    mocHasSymbolThreshold.setDescription(QStringLiteral("If set, exits with error code 0"));
+    parser.addOption(mocHasSymbolThreshold);
+
+    QCommandLineOption mocSymbolThreshold(QStringLiteral("symbol-threshold"));
+    mocSymbolThreshold.setDescription(QStringLiteral("Sets preprocessor threshold above which a warning/error is generated"));
+    mocSymbolThreshold.setValueName(QStringLiteral("threshold"));
+    parser.addOption(mocSymbolThreshold);
+
+    QCommandLineOption mocSymbolThresholdError(QStringLiteral("threshold-error"));
+    mocSymbolThresholdError.setDescription(QStringLiteral("If set, issues an error instead of a warning when threshold exceeded"));
+    parser.addOption(mocSymbolThresholdError);
+
+    QCommandLineOption mocShowIncludeHiearchy(QStringLiteral("show-include-hierarchy"));
+    mocShowIncludeHiearchy.setDescription(QStringLiteral("If set, include file hierarchy is output when threshold exceeded"));
+    parser.addOption(mocShowIncludeHiearchy);
+
     const QStringList arguments = argumentsFromCommandLineAndFile(app.arguments());
     if (arguments.isEmpty())
         return 1;
 
     parser.process(arguments);
 
+    if (parser.isSet(mocHasSymbolThreshold))
+        return 0;
+        
+    moc.symbolThreshold = parser.value(mocSymbolThreshold).toInt();
+    moc.symbolThresholdError = parser.isSet(mocSymbolThresholdError);
+    moc.showExcludeHierarchy = parser.isSet(mocShowIncludeHiearchy);
+    
     const QStringList files = parser.positionalArguments();
     output = parser.value(outputOption);
     if (parser.isSet(collectOption))
@@ -546,7 +570,7 @@ int runMoc(int argc, char **argv)
             QFile f(QFile::decodeName(rawName));
             if (f.open(QIODevice::ReadOnly)) {
                 moc.symbols += Symbol(0, MOC_INCLUDE_BEGIN, rawName);
-                moc.symbols += pp.preprocessed(rawName, &f);
+                moc.symbols += pp.preprocessed(rawName, &f, moc.includeHierarchy);
                 moc.symbols += Symbol(0, MOC_INCLUDE_END, rawName);
                 validIncludesFiles.append(includeName);
             } else {
@@ -557,7 +581,7 @@ int runMoc(int argc, char **argv)
             }
         }
     }
-    moc.symbols += pp.preprocessed(moc.filename, &in);
+    moc.symbols += pp.preprocessed(moc.filename, &in, moc.includeHierarchy);
 
     if (!pp.preprocessOnly) {
         // 2. parse

@@ -1049,8 +1049,9 @@ QByteArray Preprocessor::resolveInclude(const QByteArray &include, const QByteAr
     return it.value();
 }
 
-void Preprocessor::preprocess(const QByteArray &filename, Symbols &preprocessed)
+void Preprocessor::preprocess(const QByteArray &filename, Symbols &preprocessed, QVector<QPair<QByteArray, int>>& includeHierarchy, int nesting)
 {
+    includeHierarchy.push_back({filename, nesting});
     currentFilenames.push(filename);
     preprocessed.reserve(preprocessed.size() + symbols.size());
     while (hasNext()) {
@@ -1101,7 +1102,7 @@ void Preprocessor::preprocess(const QByteArray &filename, Symbols &preprocessed)
 
             // phase 3: preprocess conditions and substitute macros
             preprocessed += Symbol(0, MOC_INCLUDE_BEGIN, include);
-            preprocess(include, preprocessed);
+            preprocess(include, preprocessed, includeHierarchy, nesting + 1);
             preprocessed += Symbol(lineNum, MOC_INCLUDE_END, include);
 
             symbols = saveSymbols;
@@ -1214,7 +1215,7 @@ void Preprocessor::preprocess(const QByteArray &filename, Symbols &preprocessed)
     currentFilenames.pop();
 }
 
-Symbols Preprocessor::preprocessed(const QByteArray &filename, QFile *file)
+Symbols Preprocessor::preprocessed(const QByteArray &filename, QFile *file, QVector<QPair<QByteArray, int>>& includeHierarchy)
 {
     QByteArray input = readOrMapFile(file);
 
@@ -1242,7 +1243,10 @@ Symbols Preprocessor::preprocessed(const QByteArray &filename, QFile *file)
     // The magic value was found by logging the final size
     // and calculating an average when running moc over FOSS projects.
     result.reserve(file->size() / 300000);
-    preprocess(filename, result);
+    QVector<QPair<QByteArray, int>> localIncludeHierarchy;
+
+    preprocess(filename, result, localIncludeHierarchy, 0);
+    includeHierarchy.append(localIncludeHierarchy);
     mergeStringLiterals(&result);
 
 #if 0

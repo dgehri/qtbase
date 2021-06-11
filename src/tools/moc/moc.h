@@ -225,8 +225,11 @@ public:
     QHash<QByteArray, QByteArray> knownQObjectClasses;
     QHash<QByteArray, QByteArray> knownGadgets;
     QMap<QString, QJsonArray> metaArgs;
+    int symbolThreshold = 0;
+    bool symbolThresholdError = false;
+    bool showIncludeHierarchy = false;
+    QVector<QPair<QByteArray, int>> includeHierarchy;
     QVector<QString> parsedPluginMetadataFiles;
-
     void parse();
     void generate(FILE *out, FILE *jsonOutput);
 
