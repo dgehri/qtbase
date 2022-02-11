@@ -315,6 +315,10 @@ int runMoc(int argc, char **argv)
     mocShowIncludeHiearchy.setDescription(QStringLiteral("If set, include file hierarchy is output when threshold exceeded"));
     parser.addOption(mocShowIncludeHiearchy);
 
+    QCommandLineOption mocThresholdErrorAssert(QStringLiteral("threshold-error-assert"));
+    mocThresholdErrorAssert.setDescription(QStringLiteral("If set, use static_assert instead of pragma to raise error"));
+    parser.addOption(mocThresholdErrorAssert);
+
     const QStringList arguments = argumentsFromCommandLineAndFile(app.arguments());
     if (arguments.isEmpty())
         return 1;
@@ -327,6 +331,7 @@ int runMoc(int argc, char **argv)
     moc.symbolThreshold = parser.value(mocSymbolThreshold).toInt();
     moc.symbolThresholdError = parser.isSet(mocSymbolThresholdError);
     moc.showIncludeHierarchy = parser.isSet(mocShowIncludeHiearchy);
+    moc.thresholdErrorAssert = parser.isSet(mocThresholdErrorAssert);
     
     const QStringList files = parser.positionalArguments();
     if (files.count() > 1) {
