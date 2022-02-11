@@ -1028,11 +1028,20 @@ void Moc::generate(FILE *out, FILE *jsonOutput)
     if (symbolThreshold > 0 && symbols.size() > symbolThreshold) {
         auto strFileName = QFile::encodeName(QString::fromStdString(filename.toStdString())).toStdString();
         if (!symbolThresholdError) {
-            fprintf(out, "#pragma message(\"%s : warning icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\")\n\n", strFileName.c_str(), symbols.size());
+            fprintf(out, "#ifdef _MSC_VER\n");
+            fprintf(out, "#pragma message(\"%s : warning icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\")\n", strFileName.c_str(), symbols.size());
+            fprintf(out, "#endif\n\n");
             fprintf(stderr, "%s : warning icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\n", strFileName.c_str(), symbols.size());
         }
         else {
-            fprintf(out, "#pragma message(\"%s : error icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\")\n\n", strFileName.c_str(), symbols.size());
+            if (thresholdErrorAssert) {
+                fprintf(out, "#line 1 \"%s\"\n", strFileName.c_str());
+                fprintf(out, "static_assert(false, \"icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\");\n", symbols.size());
+            } else {
+                fprintf(out, "#ifdef _MSC_VER\n");
+                fprintf(out, "#pragma message(\"%s : error icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\")\n", strFileName.c_str(), symbols.size());
+                fprintf(out, "#endif\n\n");
+            }
             fprintf(stderr, "%s : error icg-moc: MOC input too complex (%d symbols). Use '#ifndef Q_MOC_RUN' to exclude non-Qt headers.\n", strFileName.c_str(), symbols.size());
         }
 
