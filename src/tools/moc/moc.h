@@ -220,7 +220,7 @@ public:
     bool showIncludeHierarchy = false;
     bool thresholdErrorAssert = false;
     QVector<QPair<QByteArray, int>> includeHierarchy;
-
+    QVector<QString> parsedPluginMetadataFiles;
     void parse();
     void generate(FILE *out);
 

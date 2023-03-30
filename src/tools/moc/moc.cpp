@@ -1356,6 +1356,7 @@ void Moc::parsePluginData(ClassDef *def)
                 error(msg.constData());
                 return;
             }
+            parsedPluginMetadataFiles.append(fi.canonicalFilePath());
             metaData = file.readAll();
         }
     }

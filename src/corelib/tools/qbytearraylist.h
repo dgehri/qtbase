@@ -70,11 +70,40 @@ protected:
 #endif
 public:
     inline QByteArray join() const
-    { return QtPrivate::QByteArrayList_join(self(), nullptr, 0); }
+    { return QByteArrayList_join(self(), nullptr, 0); }
     inline QByteArray join(const QByteArray &sep) const
-    { return QtPrivate::QByteArrayList_join(self(), sep.constData(), sep.size()); }
+    { return QByteArrayList_join(self(), sep.constData(), sep.size()); }
     inline QByteArray join(char sep) const
-    { return QtPrivate::QByteArrayList_join(self(), &sep, 1); }
+    { return QByteArrayList_join(self(), &sep, 1); }
+
+    
+    inline static QByteArray QByteArrayList_join(const QByteArrayList *that, const char *sep, int seplen)
+    {
+        QByteArray res;
+        if (const int joinedSize = QByteArrayList_joinedSize(that, seplen))
+            res.reserve(joinedSize); // don't call reserve(0) - it allocates one byte for the NUL
+        const int size = that->size();
+        for (int i = 0; i < size; ++i) {
+            if (i)
+                res.append(sep, seplen);
+            res += that->at(i);
+        }
+        return res;
+    }
+
+    inline static int QByteArrayList_joinedSize(const QByteArrayList *that, int seplen)
+    {
+        int totalLength = 0;
+        const int size = that->size();
+
+        for (int i = 0; i < size; ++i)
+            totalLength += that->at(i).size();
+
+        if (size > 0)
+            totalLength += seplen * (size - 1);
+
+        return totalLength;
+    }
 
 private:
     typedef QList<QByteArray> Self;
