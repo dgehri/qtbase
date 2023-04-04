@@ -583,9 +583,11 @@ int runMoc(int argc, char **argv)
     bool outputToFile = true;
     if (output.size()) { // output file specified
 #if defined(_MSC_VER)
-        if (_wfopen_s(&out, reinterpret_cast<const wchar_t *>(output.utf16()), L"w") != 0)
+        // first delete the file to ensure we correct the case of the file name
+        _wunlink(reinterpret_cast<const wchar_t*>(output.utf16()));
+        if (_wfopen_s(&out, reinterpret_cast<const wchar_t*>(output.utf16()), L"wx") != 0)
 #else
-        out = fopen(QFile::encodeName(output).constData(), "w"); // create output file
+        out = fopen(QFile::encodeName(output).constData(), "wx"); // create output file
         if (!out)
 #endif
         {

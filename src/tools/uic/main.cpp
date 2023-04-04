@@ -132,8 +132,13 @@ int runUic(int argc, char *argv[])
     QTextStream *out = 0;
     QFile f;
     if (driver.option().outputFile.size()) {
+        // delete the file if it exists
+        if (QFile::exists(driver.option().outputFile)) {
+            QFile::remove(driver.option().outputFile);
+        }
+
         f.setFileName(driver.option().outputFile);
-        if (!f.open(QIODevice::WriteOnly | QFile::Text)) {
+        if (!f.open(QIODevice::WriteOnly | QFile::Text | QFile::NewOnly)) {
             fprintf(stderr, "Could not create output file\n");
             return 1;
         }
