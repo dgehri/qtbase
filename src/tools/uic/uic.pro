@@ -1,3 +1,6 @@
+# CONFIG += staticlib
+CONFIG += console
+
 option(host_build)
 !force_bootstrap:if(!qtConfig(commandlineparser)|!qtConfig(textcodec)|!qtConfig(xmlstreamreader)|!qtConfig(xmlstreamwriter)): \
     CONFIG += force_bootstrap
@@ -13,4 +16,8 @@ SOURCES += main.cpp \
            uic.cpp
 
 QMAKE_TARGET_DESCRIPTION = "Qt User Interface Compiler"
-load(qt_tool)
+# load(qt_tool)
+
+QT -= gui
+LIBS += -lShell32
+

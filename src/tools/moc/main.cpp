@@ -587,6 +587,7 @@ int runMoc(int argc, char **argv)
         _wunlink(reinterpret_cast<const wchar_t*>(output.utf16()));
         if (_wfopen_s(&out, reinterpret_cast<const wchar_t*>(output.utf16()), L"wx") != 0)
 #else
+        _unlink(QFile::encodeName(output).constData());
         out = fopen(QFile::encodeName(output).constData(), "wx"); // create output file
         if (!out)
 #endif
