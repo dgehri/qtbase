@@ -151,6 +151,7 @@ int runUic(int argc, char *argv[])
     QFile f;
     if (!driver.option().outputFile.isEmpty()) {
         f.setFileName(driver.option().outputFile);
+        f.remove();
         if (!f.open(QIODevice::WriteOnly | QFile::Text)) {
             fprintf(stderr, "Could not create output file\n");
             return 1;
